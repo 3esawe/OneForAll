@@ -1,0 +1,33 @@
+Dissassembler Project walkthrough:
+	1- We have to analyze the executable by reading the ELF header fields 
+	2- We have to read the Section header fields 
+	3- We have to read the Program header fields 
+
+
+ELF : is the default binary format on Linux-based system used for object files, shared lib, and dumps.
+
+
+    An ELF binary contains executable header, program header, sections
+    every ELF file starts with executable header which is just structured series of bytes telling you this an ELF file
+    Some important ELF headers data types:
+        e_ident it's an array of size 16-bytes started with magic value which is 4-bytes long 0x7f followd by (ELF) 
+        e_type specifies the type of the binary either (ET_REL, ET_EXEC, ET_DYN) 
+        e_machine denotes the arch of the machine
+        e_entry field denotes the entry point if the binary, the virtual address at which the execution starts 
+    Section Headers the code and data in ELF binary are logically divided into contagious non overlapping chunks which are sections, the structure of each section varies from the other every section is decribed by it's section header 
+    Segments  are used in execution time but Sections are used in linking time 
+    Some import fields in section headers:
+        sh_name it contains and index into string table 
+        sh_type tells the linker about the something about the structure of the sections's content The important takeaway is that the SHT_REL and SHT_RELA sections are used for static linking purposes.
+        sh_addr, sh_offset, sh_size are fields used to describe the virtual address file offset 
+         sh_addralign sections may need to be aligned in memory in a particular way for efficiency of memory accesses. For example, a section may need to be loaded at some address that is a multiple of 8 bytes or 16 bytes.
+
+Sections: 
+    1- .init = this section contains the initialaization code that performs inetialaization tasks and needs to run before any other code in the binary is executed like constructor.
+
+    2- .fini = this section runs when the program finish execution like destructor
+
+    3- .text = this where our actuall code resides , it's the main focus for reverse engineering and binary analysis the most important thig to note here that this section is read only we cant write anything here as you notice there's something confusing here if you use [readelf -h <>] you will not see the entry point pointing to your main function instead it's pointing to _start function where you can see a call to _libc with the address of main function so in case if you are analysing stripped binary you can get the address of main by this method 
+
+    3- .bss, .data and .rodata:
+        these are sections kept for writing data to variable becasue .text section is not writable , the initialzzed variables are kept into .data, .rodata and uninit are kept on .bss section
